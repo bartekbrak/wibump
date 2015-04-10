@@ -18,7 +18,7 @@ def get_module_description(module_init):
 
 
 the_module = read_file('wibump.py')
-metadata = dict(re.findall("__([a-z_]+)__ = '([^']+)'", the_module))
+metadata = dict(re.findall("^__([a-z_]+)__ = '([^']+)'$", the_module, re.MULTILINE))
 description = get_module_description(the_module)
 setup(
     name='wibump',
