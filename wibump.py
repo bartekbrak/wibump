@@ -29,6 +29,11 @@ def parse_args():
         choices=['major', 'minor', 'patch'],
         default='patch'
     )
+    parser.add_argument(
+        '-n',
+        '--dry-run',
+        action='store_true'
+    )
     parser.add_argument('filename')
     return parser.parse_args()
 
@@ -53,6 +58,8 @@ def bump(current_version):
 
 
 def change_the_file():
+    if args.dry_run:
+        return
     file_content = get_file_contents(args.filename)
     current_version = _get_version(file_content)
     new_version = bump(current_version)
@@ -77,13 +84,15 @@ def commit(new_version):
         filename=args.filename, **new_version
     )
     print(cmd)
-    _call_shell(cmd, 'commit failed')
+    if not args.dry_run:
+        _call_shell(cmd, 'commit failed')
 
 
 def tag(new_version):
     cmd = 'git tag v{major}.{minor}.{patch}'.format(**new_version)
     print(cmd)
-    _call_shell(cmd, 'tagging failed')
+    if not args.dry_run:
+        _call_shell(cmd, 'tagging failed')
 
 
 def main():
