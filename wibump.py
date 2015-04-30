@@ -8,7 +8,7 @@ Changes the file, commits and tags. You verufy and push.
 # - defensive algorithm
 # - provide helpful messages on exceptions
 
-__version__ = '1.0.4'
+__version__ = '1.0.5'
 __author__ = 'Bartek Rychlicki'
 __author_email__ = 'bartek.r@webinterpret.com'
 import argparse
