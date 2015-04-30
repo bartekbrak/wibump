@@ -52,6 +52,12 @@ def get_file_contents(filename):
 
 def bump(current_version):
     new_version = copy(current_version)
+    # dirty
+    if args.part == 'minor':
+        new_version['patch'] = 0
+    if args.part == 'major':
+        new_version['minor'] = 0
+        new_version['patch'] = 0
     bumped = int(current_version[args.part]) + 1
     new_version[args.part] = str(bumped)
     return new_version
