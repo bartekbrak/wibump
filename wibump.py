@@ -118,6 +118,12 @@ def main():
         '[INFO] Verify that all is well and paste'
         '\n git push\n git push --tags'
         '\n[INFO] Both may be needed depending on your git.config.push.default'
+        '\n[INFO] Now build dists and upload to cheeseshops:'
+        '\n python setup.py bdist_wheel'
+        '\n python setup.py sdist  # to be deprecated, wheel is enough'
+        '\n twine upload -r wi dist/*'
+        '\n twine upload -r ubuntuwheels dist/*.whl  # optional'
+        '\n rm -rf dist  # clean'
     )
 
 if __name__ == '__main__':
