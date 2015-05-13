@@ -47,6 +47,8 @@ def parse_args():
 
 def _get_version(file_content, str_):
     search = RE_VERSION.search(file_content)
+    if not search:
+        raise Exception('regex mismatch, is version specified correctly?')
     version = search.groupdict()
     print('[INFO] {desc:>8} version : {major}.{minor}.{patch}'.format(
         desc=str_, **version))
