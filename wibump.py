@@ -17,7 +17,10 @@ import re
 import subprocess
 
 RE_VERSION = re.compile(
-    "__version__ = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'")
+    "(?P<start>(__version__|version) ?= ?)"
+    "'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'"
+)
+repl = "\g<start>'{major}.{minor}.{patch}'"
 
 
 def parse_args():
@@ -34,14 +37,19 @@ def parse_args():
         '--dry-run',
         action='store_true'
     )
-    parser.add_argument('filename')
+    parser.add_argument(
+        '-f',
+        '--filename',
+        default='setup.py'
+    )
     return parser.parse_args()
 
 
-def _get_version(file_content):
+def _get_version(file_content, str_):
     search = RE_VERSION.search(file_content)
     version = search.groupdict()
-    print('detected version : {version}'.format(version=version))
+    print('[INFO] {desc:>8} version : {major}.{minor}.{patch}'.format(
+        desc=str_, **version))
     return version
 
 
@@ -67,16 +75,17 @@ def change_the_file():
     if args.dry_run:
         return
     file_content = get_file_contents(args.filename)
-    current_version = _get_version(file_content)
+    current_version = _get_version(file_content, 'detected')
     new_version = bump(current_version)
     with open(args.filename, 'w') as fo:
-        repl = "__version__ = '{major}.{minor}.{patch}'".format(**new_version)
-        changed_file_content = RE_VERSION.sub(repl, file_content)
+        changed_file_content = RE_VERSION.sub(
+            repl.format(**new_version), file_content)
         fo.write(changed_file_content)
 
 
 def _call_shell(cmd, exception_msg):
     child = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    print('[CALLED] %s' % cmd)
     child.communicate()
     if child.returncode:
         raise Exception(exception_msg)
@@ -89,14 +98,12 @@ def commit(new_version):
     ).format(
         filename=args.filename, **new_version
     )
-    print(cmd)
     if not args.dry_run:
         _call_shell(cmd, 'commit failed')
 
 
 def tag(new_version):
     cmd = 'git tag v{major}.{minor}.{patch}'.format(**new_version)
-    print(cmd)
     if not args.dry_run:
         _call_shell(cmd, 'tagging failed')
 
@@ -105,10 +112,14 @@ def main():
     global args
     args = parse_args()
     change_the_file()
-    new_version = _get_version(get_file_contents(args.filename))
+    new_version = _get_version(get_file_contents(args.filename), 'new')
     commit(new_version)
     tag(new_version)
-    print('Verify that all is well and git push --tags.')
+    print(
+        '[INFO] Verify that all is well and paste'
+        '\n git push\n git push --tags'
+        '\n[INFO] Both may be needed depending on your git.config.push.default'
+    )
 
 if __name__ == '__main__':
     main()
