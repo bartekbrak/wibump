@@ -11,13 +11,17 @@ Changes the file, commits and tags. You verufy and push.
 import argparse
 from copy import copy
 import re
-import subprocess
+
+from git import Repo
+
 
 RE_VERSION = re.compile(
     "(?P<start>(__version__|version) ?= ?)"
     "'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'"
 )
 repl = "\g<start>'{major}.{minor}.{patch}'"
+
+repo = Repo()
 
 
 def parse_args():
@@ -82,34 +86,32 @@ def change_the_file():
         fo.write(changed_file_content)
 
 
-def _call_shell(cmd, exception_msg):
-    child = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    print('[CALLED] %s' % cmd)
-    child.communicate()
-    if child.returncode:
-        raise Exception(exception_msg)
-
-
 def commit(new_version):
-    cmd = (
-        'git commit {filename} '
-        '-m "Bump version to {major}.{minor}.{patch}"'
-    ).format(
-        filename=args.filename, **new_version
-    )
+    msg = 'Bump version to {major}.{minor}.{patch}'.format(**new_version)
     if not args.dry_run:
-        _call_shell(cmd, 'commit failed')
+        print('[CALLED] git add %s ' % args.filename)
+        repo.index.add([args.filename])
+        print('[CALLED] git commit %s -m "%s"' % (args.filename, msg))
+        repo.index.commit(msg)
 
 
 def tag(new_version):
-    cmd = 'git tag v{major}.{minor}.{patch}'.format(**new_version)
     if not args.dry_run:
-        _call_shell(cmd, 'tagging failed')
+        msg = 'v{major}.{minor}.{patch}'.format(**new_version)
+        print('[CALLED] git tag %s ' % msg)
+        repo.create_tag(path=msg)
+
+
+def validate_repository_state():
+    assert not repo.is_dirty(), 'Dirty status, aborting.'
+    assert repo.active_branch.name == 'master', \
+        'You need to be on master to bump.'
 
 
 def main():
     global args
     args = parse_args()
+    validate_repository_state()
     change_the_file()
     new_version = _get_version(get_file_contents(args.filename), 'new')
     commit(new_version)
