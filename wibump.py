@@ -84,6 +84,7 @@ def change_the_file():
         changed_file_content = RE_VERSION.sub(
             repl.format(**new_version), file_content)
         fo.write(changed_file_content)
+        print('[INFO] %s changed ' % args.filename)
 
 
 def commit(new_version):
