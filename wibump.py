@@ -126,7 +126,7 @@ def main():
         '\n python setup.py sdist  # to be deprecated, wheel is enough'
         '\n twine upload -r wi dist/*'
         '\n twine upload -r ubuntuwheels dist/*.whl  # optional'
-        '\n rm -rf dist  # clean'
+        '\n rm -rf dist build  # clean'
     )
 
 if __name__ == '__main__':
