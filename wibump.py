@@ -9,11 +9,12 @@ Changes the file, commits and tags. You verify and push.
 # - provide helpful messages on exceptions
 
 import argparse
-from copy import copy
 import re
+import sys
+from copy import copy
 
+import pkg_resources
 from git import Repo
-
 
 RE_VERSION = re.compile(
     "(?P<start>(__version__|version) ?= ?)"
@@ -42,6 +43,12 @@ def parse_args():
         '-f',
         '--filename',
         default='setup.py'
+    )
+    parser.add_argument(
+        '-v',
+        '--version',
+        action='store_true',
+        help='Print version and exit.'
     )
     return parser.parse_args()
 
@@ -112,6 +119,10 @@ def validate_repository_state():
 def main():
     global args
     args = parse_args()
+    if args.version:
+        print 'wibump', pkg_resources.get_distribution('wibump').version,
+        print 'from', __file__
+        sys.exit()
     validate_repository_state()
     change_the_file()
     new_version = _get_version(get_file_contents(args.filename), 'new')
