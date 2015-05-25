@@ -124,7 +124,7 @@ def main():
         '\n[INFO] Now build dists and upload to cheeseshops:'
         '\n python setup.py bdist_wheel'
         '\n rm -rf dist build  # clean'
-        '\n twine upload -r wi dist/*'
+        '\n twine upload -r wi dist/*.whl'
         '\n twine upload -r ubuntuwheels dist/*.whl  # optional'
         '\n rm -rf dist build  # clean'
     )
