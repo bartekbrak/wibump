@@ -12,8 +12,10 @@ import argparse
 import re
 import sys
 from copy import copy
+from functools import partial
 
 import pkg_resources
+from blessings import Terminal
 from git import Repo
 
 RE_VERSION = re.compile(
@@ -23,6 +25,7 @@ RE_VERSION = re.compile(
 repl = "\g<start>'{major}.{minor}.{patch}'"
 
 repo = Repo()
+t = Terminal()
 
 
 def parse_args():
@@ -53,12 +56,22 @@ def parse_args():
     return parser.parse_args()
 
 
+def pprint(msg, level):
+    if level == 'info':
+        print('[{t.yellow}INFO{t.normal}] {msg}'.format(msg=msg, t=t))
+    elif level == 'called':
+        print('[{t.bright_red}CALLED{t.normal}] {msg}'.format(msg=msg, t=t))
+
+info = partial(pprint, level='info')
+called = partial(pprint, level='called')
+
+
 def _get_version(file_content, str_):
     search = RE_VERSION.search(file_content)
     if not search:
         raise Exception('regex mismatch, is version specified correctly?')
     version = search.groupdict()
-    print('[INFO] {desc:>8} version : {major}.{minor}.{patch}'.format(
+    info('{desc:>8} version : {major}.{minor}.{patch}'.format(
         desc=str_, **version))
     return version
 
@@ -91,27 +104,27 @@ def change_the_file():
         changed_file_content = RE_VERSION.sub(
             repl.format(**new_version), file_content)
         fo.write(changed_file_content)
-        print('[INFO] %s changed ' % args.filename)
+        info('%s changed ' % args.filename)
 
 
 def commit(new_version):
     msg = 'Bump version to {major}.{minor}.{patch}'.format(**new_version)
     if not args.dry_run:
-        print('[CALLED] git add %s ' % args.filename)
+        called('git add %s ' % args.filename)
         repo.index.add([args.filename])
-        print('[CALLED] git commit %s -m "%s"' % (args.filename, msg))
+        called('git commit %s -m "%s"' % (args.filename, msg))
         repo.index.commit(msg)
 
 
 def tag(new_version):
     if not args.dry_run:
         msg = 'v{major}.{minor}.{patch}'.format(**new_version)
-        print('[CALLED] git tag %s ' % msg)
+        called('git tag %s ' % msg)
         repo.create_tag(path=msg)
 
 
 def validate_repository_state():
-    assert not repo.is_dirty(), 'Dirty status, aborting.'
+    # assert not repo.is_dirty(), 'Dirty status, aborting.'
     assert repo.active_branch.name == 'master', \
         'You need to be on master to bump.'
 
@@ -128,11 +141,10 @@ def main():
     new_version = _get_version(get_file_contents(args.filename), 'new')
     commit(new_version)
     tag(new_version)
-    print(
-        '[INFO] Verify that all is well and paste'
-        '\n git push\n git push --tags'
-        '\n[INFO] Both may be needed depending on your git.config.push.default'
-        '\n[INFO] Now build dists and upload to cheeseshops:'
+    info('Verify that all is well and paste\n git push\n git push --tags')
+    info('Both may be needed depending on your git.config.push.default')
+    info(
+        'Now build dists and upload to cheeseshops:'
         '\n python setup.py bdist_wheel'
         '\n rm -rf dist build  # clean'
         '\n twine upload -r wi dist/*.whl'
