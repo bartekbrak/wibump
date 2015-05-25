@@ -1,6 +1,6 @@
 """
 Bump module contained version (i.e. __init__.py).
-Changes the file, commits and tags. You verufy and push.
+Changes the file, commits and tags. You verify and push.
 """
 
 # TODO:
