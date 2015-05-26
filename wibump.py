@@ -124,7 +124,7 @@ def tag(new_version):
 
 
 def validate_repository_state():
-    # assert not repo.is_dirty(), 'Dirty status, aborting.'
+    assert not repo.is_dirty(), 'Dirty status, aborting.'
     assert repo.active_branch.name == 'master', \
         'You need to be on master to bump.'
 
