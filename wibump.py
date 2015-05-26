@@ -141,15 +141,16 @@ def main():
     new_version = _get_version(get_file_contents(args.filename), 'new')
     commit(new_version)
     tag(new_version)
-    info('Verify that all is well and paste\n git push\n git push --tags')
+    info('Verify that all is well and paste\n\tgit push\n\tgit push --tags')
     info('Both may be needed depending on your git.config.push.default')
+    print
     info(
         'Now build dists and upload to cheeseshops:'
-        '\n rm -rf dist build  # clean'
-        '\n python setup.py bdist_wheel'
-        '\n twine upload -r wi dist/*.whl'
-        '\n twine upload -r ubuntuwheels dist/*.whl  # optional'
-        '\n rm -rf dist build  # clean'
+        '\n\trm -rf dist build  # clean'
+        '\n\tpython setup.py bdist_wheel'
+        '\n\ttwine upload -r wi dist/*.whl'
+        '\n\ttwine upload -r ubuntuwheels dist/*.whl  # optional'
+        '\n\trm -rf dist build  # clean'
     )
 
 if __name__ == '__main__':
