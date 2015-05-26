@@ -146,11 +146,11 @@ def main():
     print
     info(
         'Now build dists and upload to cheeseshops:'
-        '\n\trm -rf dist build  # clean'
+        '\n\trm -rf dist build *.egg-info'
         '\n\tpython setup.py bdist_wheel'
         '\n\ttwine upload -r wi dist/*.whl'
         '\n\ttwine upload -r ubuntuwheels dist/*.whl  # optional'
-        '\n\trm -rf dist build  # clean'
+        '\n\trm -rf dist build *.egg-info'
     )
 
 if __name__ == '__main__':
