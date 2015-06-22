@@ -125,6 +125,11 @@ def tag(new_version):
 
 def validate_repository_state():
     assert not repo.is_dirty(), 'Dirty status, aborting.'
+    assert not repo.untracked_files, (
+        "Untracked files detected. Sorry, I'm over-cautious and I'll ask you "
+        "to remove these or gitignore them locally. They might end up in the "
+        "package if you're not careful and it is difficult for me detect which "
+        "file is dangerous, which not.")
     assert repo.active_branch.name == 'master', \
         'You need to be on master to bump.'
 
